@@ -1,11 +1,6 @@
+import Vue from 'vue'
+import vueCustomElement from 'vue-custom-element'
 import ChatWindow from './ChatWindow'
 
-Object.defineProperty(ChatWindow, 'install', {
-	configurable: false,
-	enumerable: false,
-	value(Vue) {
-		Vue.component('ChatWindow', ChatWindow)
-	}
-})
-
-export default ChatWindow
+Vue.use(vueCustomElement)
+Vue.customElement('chat-window', ChatWindow)

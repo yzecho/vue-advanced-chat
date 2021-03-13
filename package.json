@@ -69,8 +69,10 @@
 		"vue-template-compiler": "^2.6.11"
 	},
 	"dependencies": {
+		"@vue/web-component-wrapper": "^1.2.0",
 		"linkifyjs": "^2.1.9",
 		"v-click-outside": "^3.1.2",
+		"vue-custom-element": "^3.2.12",
 		"vue-emoji-picker": "^1.0.1",
 		"vue-infinite-loading": "^2.4.5"
 	},
