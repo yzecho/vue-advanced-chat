@@ -24,7 +24,7 @@
 			@room-info="$emit('room-info')"
 			@menu-action-handler="$emit('menu-action-handler', $event)"
 		>
-			<template v-for="(i, name) in $scopedSlots" #[name]="data">
+			<template v-for="(i, name) in $slots" #[name]="data">
 				<slot :name="name" v-bind="data" />
 			</template>
 		</room-header>
@@ -60,11 +60,11 @@
 							:distance="40"
 							@infinite="loadMoreMessages"
 						>
-							<div slot="spinner">
+							<slot name="spinner">
 								<loader :show="true" :infinite="true" />
-							</div>
-							<div slot="no-results" />
-							<div slot="no-more" />
+							</slot>
+							<slot name="no-results" />
+							<slot name="no-more" />
 						</infinite-loading>
 					</transition>
 					<transition-group :key="roomId" name="vac-fade-message" tag="span">
@@ -93,7 +93,7 @@
 								@send-message-reaction="sendMessageReaction"
 								@hide-options="hideOptions = $event"
 							>
-								<template v-for="(idx, name) in $scopedSlots" #[name]="data">
+								<template v-for="(idx, name) in $slots" #[name]="data">
 									<slot :name="name" v-bind="data" />
 								</template>
 							</message>
@@ -131,7 +131,7 @@
 				:link-options="linkOptions"
 				@reset-message="resetMessage"
 			>
-				<template v-for="(i, name) in $scopedSlots" #[name]="data">
+				<template v-for="(i, name) in $slots" #[name]="data">
 					<slot :name="name" v-bind="data" />
 				</template>
 			</room-message-reply>
@@ -274,7 +274,7 @@
 						@add-emoji="addEmoji"
 						@open-emoji="emojiOpened = $event"
 					>
-						<template v-for="(i, name) in $scopedSlots" #[name]="data">
+						<template v-for="(i, name) in $slots" #[name]="data">
 							<slot :name="name" v-bind="data" />
 						</template>
 					</emoji-picker>
@@ -576,7 +576,7 @@ export default {
 		})
 	},
 
-	beforeDestroy() {
+	beforeUnmount() {
 		this.stopRecorder()
 	},
 
