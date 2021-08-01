@@ -28772,7 +28772,7 @@ function RoomsListvue_type_template_id_0d34d6b6_render(_ctx, _cache, $props, $se
         }),
         _: 1
       }, 8, ["onInfinite"])) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-    }, undefined, true),
+    }),
     _: 1
   })])) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)], 2)), [[external_commonjs_vue_commonjs2_vue_root_Vue_["vShow"], $props.showRoomsList]]);
 }
@@ -28802,7 +28802,7 @@ function Loadervue_type_template_id_72c38546_render(_ctx, _cache, $props, $setup
           'vac-container-top': $props.infinite
         }]
       }, [Loadervue_type_template_id_72c38546_hoisted_1], 2)) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-    }, undefined, true),
+    }),
     _: 1
   });
 }
@@ -29176,7 +29176,7 @@ function RoomContentvue_type_template_id_3a21adf8_render(_ctx, _cache, $props, $
               }, ["stop"])
             }, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])(action.title), 9, ["onClick"])]);
           }), 128))])], 512)), [[_directive_click_outside, $options.closeRoomMenu]]) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-        }, undefined, true),
+        }),
         _: 1
       })) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
     })])], 2)])];
@@ -29265,7 +29265,7 @@ function FormatMessagevue_type_template_id_f10f4e70_render(_ctx, _cache, $props,
             height: message.height
           }
         }, null, 4)]), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])("div", FormatMessagevue_type_template_id_f10f4e70_hoisted_2, [Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])("span", null, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])(message.value), 1)])], 64)) : (Object(external_commonjs_vue_commonjs2_vue_root_Vue_["openBlock"])(), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createBlock"])("span", FormatMessagevue_type_template_id_f10f4e70_hoisted_3, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])(message.value), 1))];
-      }, undefined, true),
+      }),
       _: 2
     }, 1032, ["class", "href", "target", "onClick"]))]);
   }), 128))], 2)) : (Object(external_commonjs_vue_commonjs2_vue_root_Vue_["openBlock"])(), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createBlock"])("div", FormatMessagevue_type_template_id_f10f4e70_hoisted_4, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])($options.formattedContent), 1))], 2);
@@ -30113,7 +30113,7 @@ function Roomvue_type_template_id_36e80936_render(_ctx, _cache, $props, $setup, 
       return [Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])("div", null, [$options.showNoMessages ? (Object(external_commonjs_vue_commonjs2_vue_root_Vue_["openBlock"])(), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createBlock"])("div", Roomvue_type_template_id_36e80936_hoisted_3, [Object(external_commonjs_vue_commonjs2_vue_root_Vue_["renderSlot"])(_ctx.$slots, "messages-empty", {}, function () {
         return [Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createTextVNode"])(Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])($props.textMessages.MESSAGES_EMPTY), 1)];
       })])) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true), $options.showMessagesStarted ? (Object(external_commonjs_vue_commonjs2_vue_root_Vue_["openBlock"])(), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createBlock"])("div", Roomvue_type_template_id_36e80936_hoisted_4, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])($props.textMessages.CONVERSATION_STARTED) + " " + Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])($props.messages[0].date), 1)) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)])];
-    }, undefined, true),
+    }),
     _: 3
   }), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])(external_commonjs_vue_commonjs2_vue_root_Vue_["Transition"], {
     name: "vac-fade-message"
@@ -30145,7 +30145,7 @@ function Roomvue_type_template_id_36e80936_render(_ctx, _cache, $props, $setup, 
         }),
         _: 1
       }, 8, ["class", "onInfinite"])) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-    }, undefined, true),
+    }),
     _: 1
   }), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])(external_commonjs_vue_commonjs2_vue_root_Vue_["TransitionGroup"], {
     key: $props.roomId,
@@ -30192,7 +30192,7 @@ function Roomvue_type_template_id_36e80936_render(_ctx, _cache, $props, $setup, 
           };
         })]), 1032, ["current-user-id", "message", "index", "messages", "edited-message", "message-actions", "room-users", "text-messages", "room-footer-ref", "new-messages", "show-reaction-emojis", "show-new-messages-divider", "text-formatting", "link-options", "emojis-list", "hide-options", "onMessageAdded", "onMessageActionHandler", "onOpenFile", "onOpenUserTag", "onSendMessageReaction"])]);
       }), 128))];
-    }, undefined, true),
+    }),
     _: 1
   })], 2)])], 544), !$data.loadingMessages ? (Object(external_commonjs_vue_commonjs2_vue_root_Vue_["openBlock"])(), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createBlock"])("div", Roomvue_type_template_id_36e80936_hoisted_7, [Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])(external_commonjs_vue_commonjs2_vue_root_Vue_["Transition"], {
     name: "vac-bounce"
@@ -30209,7 +30209,7 @@ function Roomvue_type_template_id_36e80936_render(_ctx, _cache, $props, $setup, 
       }, {
         "default": Object(external_commonjs_vue_commonjs2_vue_root_Vue_["withCtx"])(function () {
           return [$data.scrollMessagesCount ? (Object(external_commonjs_vue_commonjs2_vue_root_Vue_["openBlock"])(), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createBlock"])("div", Roomvue_type_template_id_36e80936_hoisted_8, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])($data.scrollMessagesCount), 1)) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-        }, undefined, true),
+        }),
         _: 1
       }), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["renderSlot"])(_ctx.$slots, "scroll-icon", {}, function () {
         return [Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])(_component_svg_icon, {
@@ -30217,7 +30217,7 @@ function Roomvue_type_template_id_36e80936_render(_ctx, _cache, $props, $setup, 
           param: "scroll"
         })];
       })])) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-    }, undefined, true),
+    }),
     _: 3
   })])) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["withDirectives"])(Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])("div", Roomvue_type_template_id_36e80936_hoisted_9, [Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])(_component_room_message_reply, {
     room: $options.room,
@@ -31299,7 +31299,7 @@ function EmojiPickervue_type_template_id_361c99e8_render(_ctx, _cache, $props, $
               }, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])(emoji), 9, ["title", "onClick"]);
             }), 128))])) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)]);
           }), 128))])], 6)];
-        }, undefined, true),
+        }),
         _: 2
       }, 1024)];
     })
@@ -31502,7 +31502,7 @@ function RoomHeadervue_type_template_id_bb442b02_render(_ctx, _cache, $props, $s
               }
             }, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])(action.title), 9, ["onClick"])]);
           }), 128))])], 512)), [[_directive_click_outside, $options.closeMenu]]) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-        }, undefined, true),
+        }),
         _: 1
       })) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
     }) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)])];
@@ -31689,7 +31689,7 @@ function RoomMessageReplyvue_type_template_id_0eeafcfe_render(_ctx, _cache, $pro
           name: "close-outline"
         })];
       })])])], 4)) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-    }, undefined, true),
+    }),
     _: 3
   });
 }
@@ -32012,7 +32012,7 @@ function RoomUsersTagvue_type_template_id_0b853487_render(_ctx, _cache, $props, 
           }
         }, null, 4)) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])("div", RoomUsersTagvue_type_template_id_0b853487_hoisted_2, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])(user.username), 1)])], 8, ["onClick"]);
       }), 128))], 4)) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-    }, undefined, true),
+    }),
     _: 1
   });
 }
@@ -32060,7 +32060,7 @@ function RoomEmojisvue_type_template_id_f347885e_render(_ctx, _cache, $props, $s
           }
         }, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])(emoji), 9, ["onClick"]);
       }), 128))], 4)) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-    }, undefined, true),
+    }),
     _: 1
   });
 }
@@ -32547,7 +32547,7 @@ function MessageImagevue_type_template_id_826dfe68_render(_ctx, _cache, $props, 
           name: "document"
         })];
       })])])) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-    }, undefined, true),
+    }),
     _: 3
   })], 6), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])(_component_format_message, {
     content: $props.message.content,
@@ -32729,7 +32729,7 @@ function MessageActionsvue_type_template_id_3801d726_render(_ctx, _cache, $props
         }),
         _: 3
       }, 8, ["style", "emoji-opened", "room-footer-ref", "position-right", "onAddEmoji", "onOpenEmoji"])), [[_directive_click_outside, $options.closeEmoji]]) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-    }, undefined, true),
+    }),
     _: 3
   })], 6), $options.filteredMessageActions.length ? (Object(external_commonjs_vue_commonjs2_vue_root_Vue_["openBlock"])(), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createBlock"])(external_commonjs_vue_commonjs2_vue_root_Vue_["Transition"], {
     key: 0,
@@ -32755,7 +32755,7 @@ function MessageActionsvue_type_template_id_3801d726_render(_ctx, _cache, $props
           }
         }, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])(action.title), 9, ["onClick"])]);
       }), 128))])], 6)), [[_directive_click_outside, $options.closeOptions]]) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)];
-    }, undefined, true),
+    }),
     _: 1
   }, 8, ["name"])) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true)]);
 }
@@ -32953,7 +32953,7 @@ function MessageReactionsvue_type_template_id_0ffac8e0_render(_ctx, _cache, $pro
           }
         }, [Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createTextVNode"])(Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])($options.getEmojiByName(key)), 1), Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createVNode"])("span", null, Object(external_commonjs_vue_commonjs2_vue_root_Vue_["toDisplayString"])(reaction.length), 1)], 14, ["onClick"])), [[external_commonjs_vue_commonjs2_vue_root_Vue_["vShow"], reaction.length]]);
       }), 128))];
-    }, undefined, true),
+    }),
     _: 1
   })) : Object(external_commonjs_vue_commonjs2_vue_root_Vue_["createCommentVNode"])("", true);
 }
