@@ -60,11 +60,15 @@
 							:distance="40"
 							@infinite="loadMoreMessages"
 						>
-							<slot name="spinner">
+							<template #spinner>
 								<loader :show="true" :infinite="true" />
-							</slot>
-							<slot name="no-results" />
-							<slot name="no-more" />
+							</template>
+							<template #no-results>
+								<div />
+							</template>
+							<template #no-more>
+								<div />
+							</template>
 						</infinite-loading>
 					</transition>
 					<transition-group :key="roomId" name="vac-fade-message" tag="span">

@@ -61,11 +61,15 @@
 					spinner="spiral"
 					@infinite="loadMoreRooms"
 				>
-					<slot name="spinner">
+					<template #spinner>
 						<loader :show="true" :infinite="true" />
-					</slot>
-					<slot name="no-results" />
-					<slot name="no-more" />
+					</template>
+					<template #no-results>
+						<div />
+					</template>
+					<template #no-more>
+						<div />
+					</template>
 				</infinite-loading>
 			</transition>
 		</div>
