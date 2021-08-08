@@ -15,7 +15,6 @@
 	},
 	"dependencies": {
 		"firebase": "^8.2.2",
-		"lamejs": "^1.2.0",
 		"vue": "^3.1.0",
 		"vue-advanced-chat": "https://github.com/antoine92190/vue-advanced-chat/tarball/next"
 	},

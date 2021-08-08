@@ -174,13 +174,10 @@ this.rooms[i].typingUsers = [...this.rooms[i].typingUsers, typingUserId]
 this.rooms[i].typingUsers.push(typingUserId)
 ```
 
-- To add or replace an item inside an array, use `$set` method or spread operator
+- To add or replace an item inside an array, use spread operator
 
 ```javascript
 // DO THIS
-this.$set(this.rooms, roomIndex, room)
-
-// OR DO THIS
 this.rooms[roomIndex] = room
 this.rooms = [...this.rooms]
 
@@ -831,7 +828,7 @@ yarn add --save vue
 
 ## Use in a Vue 3 project
 
-### Install vue-advance-chat component
+### Install vue-advance-chat component (next branch)
 
 ```bash
 # Using npm
@@ -851,7 +848,6 @@ npm install --save-dev @vue/compat
 // vue.config.js
 
 module.exports = {
-  ...
   chainWebpack: config => {
     config.resolve.alias.set('vue', '@vue/compat')
 
@@ -881,7 +877,3 @@ Your help is always appreciated :rocket:
 ## License
 
 This project is licensed under [MIT License](http://en.wikipedia.org/wiki/MIT_License)
-
-```
-
-```
