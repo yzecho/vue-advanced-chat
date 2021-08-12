@@ -157,7 +157,7 @@
 				@remove-file="removeFile"
 				@reset-message="resetMessage"
 			>
-				<template v-for="(i, name) in $scopedSlots" #[name]="data">
+				<template v-for="(i, name) in $slots" #[name]="data">
 					<slot :name="name" v-bind="data" />
 				</template>
 			</room-files>
