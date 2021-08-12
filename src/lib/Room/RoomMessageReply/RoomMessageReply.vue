@@ -25,23 +25,38 @@
 					</div>
 				</div>
 
-				<img
-					v-if="isImageFile"
-					:src="messageReply.file.url"
-					class="vac-image-reply"
-				/>
-				<video v-else-if="isVideoFile" controls class="vac-image-reply">
-					<source :src="messageReply.file.url" />
+				<img v-if="isImage" :src="firstFile.url" class="vac-image-reply" />
+
+				<video v-else-if="isVideo" controls class="vac-image-reply">
+					<source :src="firstFile.url" />
 				</video>
+
 				<audio-player
-					v-else-if="isAudioFile"
-					:src="messageReply.file.url"
+					v-else-if="isAudio"
+					:src="firstFile.url"
 					class="vac-audio-reply"
 				>
 					<template v-for="(i, name) in $slots" #[name]="data">
 						<slot :name="name" v-bind="data" />
 					</template>
 				</audio-player>
+
+				<div v-else-if="isOtherFile" class="vac-image-reply vac-file-container">
+					<div>
+						<slot name="file-icon">
+							<svg-icon name="file" />
+						</slot>
+					</div>
+					<div class="vac-text-ellipsis">
+						{{ firstFile.name }}
+					</div>
+					<div
+						v-if="firstFile.extension"
+						class="vac-text-ellipsis vac-text-extension"
+					>
+						{{ firstFile.extension }}
+					</div>
+				</div>
 			</div>
 
 			<div class="vac-icon-reply">
@@ -85,14 +100,25 @@ export default {
 	emits: ['reset-message'],
 
 	computed: {
-		isImageFile() {
-			return isImageFile(this.messageReply.file)
+		firstFile() {
+			return this.messageReply.files ? this.messageReply.files[0] : {}
 		},
-		isVideoFile() {
-			return isVideoFile(this.messageReply.file)
+		isImage() {
+			return isImageFile(this.firstFile)
 		},
-		isAudioFile() {
-			return isAudioFile(this.messageReply.file)
+		isVideo() {
+			return isVideoFile(this.firstFile)
+		},
+		isAudio() {
+			return isAudioFile(this.firstFile)
+		},
+		isOtherFile() {
+			return (
+				this.messageReply.files &&
+				!this.isAudio &&
+				!this.isVideo &&
+				!this.isImage
+			)
 		}
 	}
 }

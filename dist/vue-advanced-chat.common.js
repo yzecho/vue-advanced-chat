@@ -18814,6 +18814,82 @@ module.exports = VBRQuantize;
 
 /***/ }),
 
+/***/ "a434":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__("23e7");
+var toAbsoluteIndex = __webpack_require__("23cb");
+var toInteger = __webpack_require__("a691");
+var toLength = __webpack_require__("50c4");
+var toObject = __webpack_require__("7b0b");
+var arraySpeciesCreate = __webpack_require__("65f0");
+var createProperty = __webpack_require__("8418");
+var arrayMethodHasSpeciesSupport = __webpack_require__("1dde");
+
+var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('splice');
+
+var max = Math.max;
+var min = Math.min;
+var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
+var MAXIMUM_ALLOWED_LENGTH_EXCEEDED = 'Maximum allowed length exceeded';
+
+// `Array.prototype.splice` method
+// https://tc39.es/ecma262/#sec-array.prototype.splice
+// with adding support of @@species
+$({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT }, {
+  splice: function splice(start, deleteCount /* , ...items */) {
+    var O = toObject(this);
+    var len = toLength(O.length);
+    var actualStart = toAbsoluteIndex(start, len);
+    var argumentsLength = arguments.length;
+    var insertCount, actualDeleteCount, A, k, from, to;
+    if (argumentsLength === 0) {
+      insertCount = actualDeleteCount = 0;
+    } else if (argumentsLength === 1) {
+      insertCount = 0;
+      actualDeleteCount = len - actualStart;
+    } else {
+      insertCount = argumentsLength - 2;
+      actualDeleteCount = min(max(toInteger(deleteCount), 0), len - actualStart);
+    }
+    if (len + insertCount - actualDeleteCount > MAX_SAFE_INTEGER) {
+      throw TypeError(MAXIMUM_ALLOWED_LENGTH_EXCEEDED);
+    }
+    A = arraySpeciesCreate(O, actualDeleteCount);
+    for (k = 0; k < actualDeleteCount; k++) {
+      from = actualStart + k;
+      if (from in O) createProperty(A, k, O[from]);
+    }
+    A.length = actualDeleteCount;
+    if (insertCount < actualDeleteCount) {
+      for (k = actualStart; k < len - actualDeleteCount; k++) {
+        from = k + actualDeleteCount;
+        to = k + insertCount;
+        if (from in O) O[to] = O[from];
+        else delete O[to];
+      }
+      for (k = len; k > len - actualDeleteCount + insertCount; k--) delete O[k - 1];
+    } else if (insertCount > actualDeleteCount) {
+      for (k = len - actualDeleteCount; k > actualStart; k--) {
+        from = k + actualDeleteCount - 1;
+        to = k + insertCount - 1;
+        if (from in O) O[to] = O[from];
+        else delete O[to];
+      }
+    }
+    for (k = 0; k < insertCount; k++) {
+      O[k + actualStart] = arguments[k + 2];
+    }
+    O.length = len - actualDeleteCount + insertCount;
+    return A;
+  }
+});
+
+
+/***/ }),
+
 /***/ "a4b4":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21382,6 +21458,7 @@ module.exports = QuantizePVT;
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isImageFile", function() { return isImageFile; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isVideoFile", function() { return isVideoFile; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isImageVideoFile", function() { return isImageVideoFile; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isAudioFile", function() { return isAudioFile; });
 /* harmony import */ var core_js_modules_es_array_some_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("45fc");
 /* harmony import */ var core_js_modules_es_array_some_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_some_js__WEBPACK_IMPORTED_MODULE_0__);
@@ -21407,6 +21484,9 @@ function isImageFile(file) {
 }
 function isVideoFile(file) {
   return checkMediaType(_constants__WEBPACK_IMPORTED_MODULE_3__[/* VIDEO_TYPES */ "c"], file);
+}
+function isImageVideoFile(file) {
+  return checkMediaType(_constants__WEBPACK_IMPORTED_MODULE_3__[/* IMAGE_TYPES */ "b"], file) || checkMediaType(_constants__WEBPACK_IMPORTED_MODULE_3__[/* VIDEO_TYPES */ "c"], file);
 }
 function isAudioFile(file) {
   return checkMediaType(_constants__WEBPACK_IMPORTED_MODULE_3__[/* AUDIO_TYPES */ "a"], file);
@@ -33335,7 +33415,7 @@ var _require = __webpack_require__("bd43"),
       return !this.typingUsers && this.room.lastMessage && !this.room.lastMessage.deleted && this.room.lastMessage.senderId === this.currentUserId && (this.room.lastMessage.saved || this.room.lastMessage.distributed || this.room.lastMessage.seen);
     },
     formattedDuration: function formattedDuration() {
-      var file = this.room.lastMessage.file;
+      var file = this.room.lastMessage.files[0];
 
       if (!file.duration) {
         return "".concat(file.name, ".").concat(file.extension);
@@ -33345,7 +33425,7 @@ var _require = __webpack_require__("bd43"),
       return (s - (s %= 60)) / 60 + (s > 9 ? ':' : ':0') + s;
     },
     isAudio: function isAudio() {
-      return isAudioFile(this.room.lastMessage.file);
+      return this.room.lastMessage.files ? isAudioFile(this.room.lastMessage.files[0]) : false;
     }
   },
   methods: {
@@ -34133,6 +34213,9 @@ var es_date_to_string = __webpack_require__("0d03");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/web.url.js
 var web_url = __webpack_require__("2b3d");
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.splice.js
+var es_array_splice = __webpack_require__("a434");
+
 // EXTERNAL MODULE: ./node_modules/emoji-picker-element/picker.js
 var picker = __webpack_require__("874e");
 
@@ -34826,9 +34909,9 @@ AudioPlayervue_type_script_lang_js.render = AudioPlayervue_type_template_id_752d
 
 
 var RoomMessageReplyvue_type_script_lang_js_require = __webpack_require__("bd43"),
-    _isAudioFile = RoomMessageReplyvue_type_script_lang_js_require.isAudioFile,
-    _isImageFile = RoomMessageReplyvue_type_script_lang_js_require.isImageFile,
-    _isVideoFile = RoomMessageReplyvue_type_script_lang_js_require.isVideoFile;
+    RoomMessageReplyvue_type_script_lang_js_isAudioFile = RoomMessageReplyvue_type_script_lang_js_require.isAudioFile,
+    RoomMessageReplyvue_type_script_lang_js_isImageFile = RoomMessageReplyvue_type_script_lang_js_require.isImageFile,
+    RoomMessageReplyvue_type_script_lang_js_isVideoFile = RoomMessageReplyvue_type_script_lang_js_require.isVideoFile;
 
 /* harmony default export */ var RoomMessageReplyvue_type_script_lang_js = ({
   name: 'RoomMessageReply',
@@ -34857,14 +34940,20 @@ var RoomMessageReplyvue_type_script_lang_js_require = __webpack_require__("bd43"
   },
   emits: ['reset-message'],
   computed: {
-    isImageFile: function isImageFile() {
-      return _isImageFile(this.messageReply.file);
+    firstFile: function firstFile() {
+      return this.messageReply.files ? this.messageReply.files[0] : {};
     },
-    isVideoFile: function isVideoFile() {
-      return _isVideoFile(this.messageReply.file);
+    isImage: function isImage() {
+      return RoomMessageReplyvue_type_script_lang_js_isImageFile(this.firstFile);
     },
-    isAudioFile: function isAudioFile() {
-      return _isAudioFile(this.messageReply.file);
+    isVideo: function isVideo() {
+      return RoomMessageReplyvue_type_script_lang_js_isVideoFile(this.firstFile);
+    },
+    isAudio: function isAudio() {
+      return RoomMessageReplyvue_type_script_lang_js_isAudioFile(this.firstFile);
+    },
+    isOtherFile: function isOtherFile() {
+      return this.messageReply.files && !this.isAudio && !this.isVideo && !this.isImage;
     }
   }
 });
@@ -35333,8 +35422,8 @@ function MessageReplyvue_type_template_id_1d339754_render(_ctx, _cache, $props, 
 
 var MessageReplyvue_type_script_lang_js_require = __webpack_require__("bd43"),
     MessageReplyvue_type_script_lang_js_isAudioFile = MessageReplyvue_type_script_lang_js_require.isAudioFile,
-    isImageFile = MessageReplyvue_type_script_lang_js_require.isImageFile,
-    isVideoFile = MessageReplyvue_type_script_lang_js_require.isVideoFile;
+    MessageReplyvue_type_script_lang_js_isImageFile = MessageReplyvue_type_script_lang_js_require.isImageFile,
+    MessageReplyvue_type_script_lang_js_isVideoFile = MessageReplyvue_type_script_lang_js_require.isVideoFile;
 
 /* harmony default export */ var MessageReplyvue_type_script_lang_js = ({
   name: 'MessageReply',
@@ -35368,14 +35457,17 @@ var MessageReplyvue_type_script_lang_js_require = __webpack_require__("bd43"),
       });
       return replyUser ? replyUser.username : '';
     },
+    firstFile: function firstFile() {
+      return this.message.replyMessage.files ? this.message.replyMessage.files[0] : {};
+    },
     isAudio: function isAudio() {
-      return MessageReplyvue_type_script_lang_js_isAudioFile(this.message.replyMessage.file);
+      return MessageReplyvue_type_script_lang_js_isAudioFile(this.firstFile);
     },
     isImage: function isImage() {
-      return isImageFile(this.message.replyMessage.file);
+      return MessageReplyvue_type_script_lang_js_isImageFile(this.firstFile);
     },
     isVideo: function isVideo() {
-      return isVideoFile(this.message.replyMessage.file);
+      return MessageReplyvue_type_script_lang_js_isVideoFile(this.firstFile);
     }
   }
 });
@@ -35470,6 +35562,9 @@ function MessageImagevue_type_template_id_826dfe68_render(_ctx, _cache, $props, 
 
 
 
+var MessageFilevue_type_script_lang_js_require = __webpack_require__("bd43"),
+    MessageFilevue_type_script_lang_js_isImageFile = MessageFilevue_type_script_lang_js_require.isImageFile,
+    MessageFilevue_type_script_lang_js_isVideoFile = MessageFilevue_type_script_lang_js_require.isVideoFile;
 
 var MessageImagevue_type_script_lang_js_require = __webpack_require__("bd43"),
     MessageImagevue_type_script_lang_js_isImageFile = MessageImagevue_type_script_lang_js_require.isImageFile;
@@ -35478,8 +35573,7 @@ var MessageImagevue_type_script_lang_js_require = __webpack_require__("bd43"),
   name: 'MessageImage',
   components: {
     SvgIcon: SvgIcon,
-    Loader: Loader,
-    FormatMessage: FormatMessage
+    Loader: Loader
   },
   props: {
     currentUserId: {
@@ -35490,40 +35584,36 @@ var MessageImagevue_type_script_lang_js_require = __webpack_require__("bd43"),
       type: Object,
       required: true
     },
-    roomUsers: {
-      type: Array,
-      required: true
-    },
-    textFormatting: {
-      type: Boolean,
-      required: true
-    },
-    linkOptions: {
+    file: {
       type: Object,
       required: true
     },
-    imageHover: {
-      type: Boolean,
+    index: {
+      type: Number,
       required: true
     }
   },
-  emits: ['open-file', 'open-user-tag'],
+  emits: ['open-file'],
   data: function data() {
     return {
+      imageResponsive: '',
       imageLoading: false,
-      imageResponsive: ''
+      imageHover: false
     };
   },
   computed: {
     isImageLoading: function isImageLoading() {
-      return this.message.file.url.indexOf('blob:http') !== -1 || this.imageLoading;
+      return this.file.url.indexOf('blob:http') !== -1 || this.imageLoading;
     },
-    imageBackground: function imageBackground() {
-      return this.isImageLoading ? this.message.file.preview || this.message.file.url : this.message.file.url;
+    isImage: function isImage() {
+      return MessageFilevue_type_script_lang_js_isImageFile(this.file);
+    },
+    isVideo: function isVideo() {
+      return MessageFilevue_type_script_lang_js_isVideoFile(this.file);
     }
   },
   watch: {
-    message: {
+    file: {
       immediate: true,
       handler: function handler() {
         this.checkImgLoad();
@@ -35531,21 +35621,31 @@ var MessageImagevue_type_script_lang_js_require = __webpack_require__("bd43"),
     }
   },
   mounted: function mounted() {
-    this.imageResponsive = {
-      maxHeight: this.$refs.imageRef.clientWidth - 18,
-      loaderTop: this.$refs.imageRef.clientWidth / 2
-    };
+    var ref = this.$refs['imageRef' + this.index];
+
+    if (ref) {
+      this.imageResponsive = {
+        maxHeight: ref.clientWidth - 18,
+        loaderTop: ref.clientHeight / 2 - 9
+      };
+    }
   },
   methods: {
     checkImgLoad: function checkImgLoad() {
       var _this = this;
 
-      if (!MessageImagevue_type_script_lang_js_isImageFile(this.message.file)) return;
+      if (!MessageFilevue_type_script_lang_js_isImageFile(this.file)) return;
       this.imageLoading = true;
       var image = new Image();
-      image.src = this.message.file.url;
+      image.src = this.file.url;
       image.addEventListener('load', function () {
         return _this.imageLoading = false;
+      });
+    },
+    openFile: function openFile(action) {
+      this.$emit('open-file', {
+        file: this.file,
+        action: action
       });
     }
   }
@@ -35723,9 +35823,6 @@ var MessageActionsvue_type_script_lang_js_require = __webpack_require__("bd43"),
     };
   },
   computed: {
-    isImage: function isImage() {
-      return MessageActionsvue_type_script_lang_js_isImageFile(this.message.file);
-    },
     isMessageActions: function isMessageActions() {
       return this.filteredMessageActions.length && this.messageHover && !this.message.deleted && !this.message.disableActions && !this.hoverAudioProgress;
     },
@@ -35903,8 +36000,6 @@ var Messagevue_type_script_lang_js_require = __webpack_require__("4c1d"),
     messagesValidation = Messagevue_type_script_lang_js_require.messagesValidation;
 
 var _require2 = __webpack_require__("bd43"),
-    Messagevue_type_script_lang_js_isImageFile = _require2.isImageFile,
-    Messagevue_type_script_lang_js_isVideoFile = _require2.isVideoFile,
     Messagevue_type_script_lang_js_isAudioFile = _require2.isAudioFile;
 
 /* harmony default export */ var Messagevue_type_script_lang_js = ({
@@ -35914,7 +36009,7 @@ var _require2 = __webpack_require__("bd43"),
     FormatMessage: FormatMessage,
     AudioPlayer: AudioPlayer,
     MessageReply: MessageReply,
-    MessageImage: MessageImage,
+    MessageFiles: MessageFiles,
     MessageActions: MessageActions,
     MessageReactions: MessageReactions
   },
@@ -35988,7 +36083,6 @@ var _require2 = __webpack_require__("bd43"),
   data: function data() {
     return {
       hoverMessageId: null,
-      imageHover: false,
       messageHover: false,
       optionsOpened: false,
       emojiOpened: false,
@@ -36007,14 +36101,12 @@ var _require2 = __webpack_require__("bd43"),
     isMessageHover: function isMessageHover() {
       return this.editedMessage._id === this.message._id || this.hoverMessageId === this.message._id;
     },
-    isImage: function isImage() {
-      return Messagevue_type_script_lang_js_isImageFile(this.message.file);
-    },
-    isVideo: function isVideo() {
-      return Messagevue_type_script_lang_js_isVideoFile(this.message.file);
-    },
     isAudio: function isAudio() {
-      return Messagevue_type_script_lang_js_isAudioFile(this.message.file);
+      var _this$message$files;
+
+      return (_this$message$files = this.message.files) === null || _this$message$files === void 0 ? void 0 : _this$message$files.some(function (file) {
+        return Messagevue_type_script_lang_js_isAudioFile(file);
+      });
     },
     isCheckmarkVisible: function isCheckmarkVisible() {
       return this.message.senderId === this.currentUserId && !this.message.deleted && (this.message.saved || this.message.distributed || this.message.seen);
@@ -36045,7 +36137,6 @@ var _require2 = __webpack_require__("bd43"),
   },
   methods: {
     onHoverMessage: function onHoverMessage() {
-      this.imageHover = true;
       this.messageHover = true;
       if (this.canEditMessage()) this.hoverMessageId = this.message._id;
     },
@@ -36053,14 +36144,13 @@ var _require2 = __webpack_require__("bd43"),
       return !this.message.deleted;
     },
     onLeaveMessage: function onLeaveMessage() {
-      this.imageHover = false;
       if (!this.optionsOpened && !this.emojiOpened) this.messageHover = false;
       this.hoverMessageId = null;
     },
-    openFile: function openFile(action) {
+    openFile: function openFile(file) {
       this.$emit('open-file', {
         message: this.message,
-        action: action
+        file: file
       });
     },
     openUserTag: function openUserTag(user) {
@@ -36505,13 +36595,10 @@ var recorder_default = /*#__PURE__*/function () {
 
 
 
+
 var Roomvue_type_script_lang_js_require = __webpack_require__("1a98"),
     detectMobile = Roomvue_type_script_lang_js_require.detectMobile,
     iOSDevice = Roomvue_type_script_lang_js_require.iOSDevice;
-
-var Roomvue_type_script_lang_js_require2 = __webpack_require__("bd43"),
-    Roomvue_type_script_lang_js_isImageFile = Roomvue_type_script_lang_js_require2.isImageFile,
-    Roomvue_type_script_lang_js_isVideoFile = Roomvue_type_script_lang_js_require2.isVideoFile;
 
 var debounce = function debounce(func, delay) {
   var inDebounce;
@@ -36533,6 +36620,7 @@ var debounce = function debounce(func, delay) {
     SvgIcon: SvgIcon,
     EmojiPickerContainer: EmojiPickerContainer,
     RoomHeader: RoomHeader,
+    RoomFiles: RoomFiles,
     RoomMessageReply: RoomMessageReply,
     RoomUsersTag: RoomUsersTag,
     RoomEmojis: RoomEmojis,
@@ -36656,10 +36744,7 @@ var debounce = function debounce(func, delay) {
       infiniteState: null,
       loadingMessages: false,
       loadingMoreMessages: false,
-      file: null,
-      imageFile: null,
-      videoFile: null,
-      mediaDimensions: null,
+      files: [],
       fileDialog: false,
       emojiOpened: false,
       hideOptions: true,
@@ -36703,10 +36788,13 @@ var debounce = function debounce(func, delay) {
       return this.messages.length && this.messagesLoaded;
     },
     isMessageEmpty: function isMessageEmpty() {
-      return !this.file && !this.message.trim();
+      return !this.files.length && !this.message.trim();
     },
     recordedTime: function recordedTime() {
       return new Date(this.recorder.duration * 1000).toISOString().substr(14, 5);
+    },
+    shadowFooter: function shadowFooter() {
+      return !!this.filteredEmojis.length || !!this.filteredUsersTag.length || !!this.files.length || !!this.messageReply;
     }
   },
   watch: {
@@ -36836,7 +36924,7 @@ var debounce = function debounce(func, delay) {
       this.loadingMessages = true;
       this.scrollIcon = false;
       this.scrollMessagesCount = 0;
-      this.resetMessage(true, null, true);
+      this.resetMessage(true, true);
 
       if (this.roomMessage) {
         this.message = this.roomMessage;
@@ -37019,14 +37107,6 @@ var debounce = function debounce(func, delay) {
 
       this.textareaCursorPosition = null;
     },
-    onMediaLoad: function onMediaLoad() {
-      var height = this.$refs.mediaFile.clientHeight;
-      if (height < 30) height = 30;
-      this.mediaDimensions = {
-        height: this.$refs.mediaFile.clientHeight - 10,
-        width: this.$refs.mediaFile.clientWidth + 26
-      };
-    },
     escapeTextarea: function escapeTextarea() {
       if (this.filteredEmojis.length) this.filteredEmojis = [];else if (this.filteredUsersTag.length) this.filteredUsersTag = [];else this.resetMessage();
     },
@@ -37034,21 +37114,10 @@ var debounce = function debounce(func, delay) {
       var _this9 = this;
 
       var disableMobileFocus = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-      var editFile = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      var initRoom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+      var initRoom = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
       if (!initRoom) {
         this.$emit('typing-message', null);
-      }
-
-      if (editFile) {
-        this.file = null;
-        this.message = '';
-        this.preventKeyboardFromClosing();
-        setTimeout(function () {
-          return _this9.focusTextarea(disableMobileFocus);
-        });
-        return;
       }
 
       this.selectedUsersTag = [];
@@ -37057,24 +37126,12 @@ var debounce = function debounce(func, delay) {
       this.message = '';
       this.editedMessage = {};
       this.messageReply = null;
-      this.file = null;
-      this.mediaDimensions = null;
-      this.imageFile = null;
-      this.videoFile = null;
+      this.files = [];
       this.emojiOpened = false;
       this.preventKeyboardFromClosing();
       setTimeout(function () {
         return _this9.focusTextarea(disableMobileFocus);
       });
-    },
-    resetMediaFile: function resetMediaFile() {
-      this.mediaDimensions = null;
-      this.imageFile = null;
-      this.videoFile = null;
-      this.editedMessage.file = null;
-      this.file = null;
-      this.resetTextareaSize();
-      this.focusTextarea();
     },
     resetTextareaSize: function resetTextareaSize() {
       if (!this.$refs['roomTextarea']) return;
@@ -37100,17 +37157,18 @@ var debounce = function debounce(func, delay) {
     },
     sendMessage: function sendMessage() {
       var message = this.message.trim();
-      if (!this.file && !message) return;
+      if (!this.files.length && !message) return;
       this.selectedUsersTag.forEach(function (user) {
         message = message.replace("@".concat(user.username), "<usertag>".concat(user._id, "</usertag>"));
       });
+      var files = this.files.length ? this.files : null;
 
       if (this.editedMessage._id) {
-        if (this.editedMessage.content !== message || this.file) {
+        if (this.editedMessage.content !== message || files) {
           this.$emit('edit-message', {
             messageId: this.editedMessage._id,
             newContent: message,
-            file: this.file,
+            files: files,
             replyMessage: this.messageReply,
             usersTag: this.selectedUsersTag
           });
@@ -37118,7 +37176,7 @@ var debounce = function debounce(func, delay) {
       } else {
         this.$emit('send-message', {
           content: message,
-          file: this.file,
+          files: files,
           replyMessage: this.messageReply,
           usersTag: this.selectedUsersTag
         });
@@ -37174,29 +37232,18 @@ var debounce = function debounce(func, delay) {
       this.$emit('send-message-reaction', messageReaction);
     },
     replyMessage: function replyMessage(message) {
+      this.editedMessage = {};
       this.messageReply = message;
       this.focusTextarea();
     },
     editMessage: function editMessage(message) {
-      var _this12 = this;
-
       this.resetMessage();
       this.editedMessage = _objectSpread2({}, message);
-      this.file = message.file;
-
-      if (Roomvue_type_script_lang_js_isImageFile(this.file)) {
-        this.imageFile = message.file.url;
-        setTimeout(function () {
-          return _this12.onMediaLoad();
-        });
-      } else if (Roomvue_type_script_lang_js_isVideoFile(this.file)) {
-        this.videoFile = message.file.url;
-        setTimeout(function () {
-          return _this12.onMediaLoad();
-        }, 50);
-      }
-
       this.message = message.content;
+
+      if (message.files) {
+        this.files = _toConsumableArray(message.files);
+      }
     },
     getBottomScroll: function getBottomScroll(element) {
       var scrollHeight = element.scrollHeight,
@@ -37205,10 +37252,10 @@ var debounce = function debounce(func, delay) {
       return scrollHeight - clientHeight - scrollTop;
     },
     scrollToBottom: function scrollToBottom() {
-      var _this13 = this;
+      var _this12 = this;
 
       setTimeout(function () {
-        var element = _this13.$refs.scrollContainer;
+        var element = _this12.$refs.scrollContainer;
         element.classList.add('vac-scroll-smooth');
         element.scrollTo({
           top: element.scrollHeight,
@@ -37242,7 +37289,7 @@ var debounce = function debounce(func, delay) {
     },
     onPasteImage: function onPasteImage(pasteEvent) {
       var _pasteEvent$clipboard,
-          _this14 = this;
+          _this13 = this;
 
       var items = (_pasteEvent$clipboard = pasteEvent.clipboardData) === null || _pasteEvent$clipboard === void 0 ? void 0 : _pasteEvent$clipboard.items;
 
@@ -37251,65 +37298,75 @@ var debounce = function debounce(func, delay) {
           if (item.type.includes('image')) {
             var blob = item.getAsFile();
 
-            _this14.onFileChange([blob]);
+            _this13.onFileChange([blob]);
           }
         });
       }
     },
     onFileChange: function onFileChange(files) {
-      var _this15 = this;
+      var _this14 = this;
 
-      return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-        var file, fileURL, blobFile, typeIndex;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
-                _this15.fileDialog = true;
+                _this14.fileDialog = true;
 
-                _this15.resetMediaFile();
+                _this14.focusTextarea();
 
-                file = files[0];
-                fileURL = URL.createObjectURL(file);
-                _context2.next = 6;
-                return fetch(fileURL).then(function (res) {
-                  return res.blob();
-                });
+                files.forEach( /*#__PURE__*/function () {
+                  var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(file) {
+                    var fileURL, blobFile, typeIndex;
+                    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                      while (1) {
+                        switch (_context2.prev = _context2.next) {
+                          case 0:
+                            fileURL = URL.createObjectURL(file);
+                            _context2.next = 3;
+                            return fetch(fileURL).then(function (res) {
+                              return res.blob();
+                            });
 
-              case 6:
-                blobFile = _context2.sent;
-                typeIndex = file.name.lastIndexOf('.');
-                _this15.file = {
-                  blob: blobFile,
-                  name: file.name.substring(0, typeIndex),
-                  size: file.size,
-                  type: file.type,
-                  extension: file.name.substring(typeIndex + 1),
-                  localUrl: fileURL
-                };
+                          case 3:
+                            blobFile = _context2.sent;
+                            typeIndex = file.name.lastIndexOf('.');
 
-                if (Roomvue_type_script_lang_js_isImageFile(_this15.file)) {
-                  _this15.imageFile = fileURL;
-                } else if (Roomvue_type_script_lang_js_isVideoFile(_this15.file)) {
-                  _this15.videoFile = fileURL;
-                  setTimeout(function () {
-                    return _this15.onMediaLoad();
-                  }, 50);
-                } else {
-                  _this15.message = file.name;
-                }
+                            _this14.files.push({
+                              blob: blobFile,
+                              name: file.name.substring(0, typeIndex),
+                              size: file.size,
+                              type: file.type,
+                              extension: file.name.substring(typeIndex + 1),
+                              localUrl: fileURL
+                            });
 
+                          case 6:
+                          case "end":
+                            return _context2.stop();
+                        }
+                      }
+                    }, _callee2);
+                  }));
+
+                  return function (_x) {
+                    return _ref3.apply(this, arguments);
+                  };
+                }());
                 setTimeout(function () {
-                  return _this15.fileDialog = false;
+                  return _this14.fileDialog = false;
                 }, 500);
 
-              case 11:
+              case 4:
               case "end":
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2);
+        }, _callee3);
       }))();
+    },
+    removeFile: function removeFile(index) {
+      this.files.splice(index, 1);
     },
     initRecorder: function initRecorder() {
       this.isRecording = false;
@@ -37325,19 +37382,19 @@ var debounce = function debounce(func, delay) {
       this.recorder = this.initRecorder();
     },
     toggleRecorder: function toggleRecorder(recording) {
-      var _this16 = this;
+      var _this15 = this;
 
       this.isRecording = recording;
 
       if (!this.recorder.isRecording) {
         setTimeout(function () {
-          return _this16.recorder.start();
+          return _this15.recorder.start();
         }, 200);
       } else {
         try {
           this.recorder.stop();
           var record = this.recorder.records[0];
-          this.file = {
+          this.files.push({
             blob: record.blob,
             name: "audio.".concat(this.format),
             size: record.blob.size,
@@ -37345,18 +37402,18 @@ var debounce = function debounce(func, delay) {
             type: record.blob.type,
             audio: true,
             localUrl: URL.createObjectURL(record.blob)
-          };
+          });
           this.recorder = this.initRecorder();
           this.sendMessage();
         } catch (_unused) {
           setTimeout(function () {
-            return _this16.stopRecorder();
+            return _this15.stopRecorder();
           }, 100);
         }
       }
     },
     stopRecorder: function stopRecorder() {
-      var _this17 = this;
+      var _this16 = this;
 
       if (this.recorder.isRecording) {
         try {
@@ -37364,17 +37421,17 @@ var debounce = function debounce(func, delay) {
           this.recorder = this.initRecorder();
         } catch (_unused2) {
           setTimeout(function () {
-            return _this17.stopRecorder();
+            return _this16.stopRecorder();
           }, 100);
         }
       }
     },
-    openFile: function openFile(_ref3) {
-      var message = _ref3.message,
-          action = _ref3.action;
+    openFile: function openFile(_ref4) {
+      var message = _ref4.message,
+          file = _ref4.file;
       this.$emit('open-file', {
         message: message,
-        action: action
+        file: file
       });
     },
     openUserTag: function openUserTag(user) {
@@ -37491,7 +37548,8 @@ var defaultThemeStyles = {
       backgroundAudioRecord: '#eb4034',
       backgroundAudioLine: 'rgba(0, 0, 0, 0.15)',
       backgroundAudioProgress: '#455247',
-      backgroundAudioProgressSelector: '#455247'
+      backgroundAudioProgressSelector: '#455247',
+      colorFileExtension: '#757e85'
     },
     markdown: {
       background: 'rgba(239, 239, 239, 0.7)',
@@ -37617,7 +37675,8 @@ var defaultThemeStyles = {
       backgroundAudioRecord: '#eb4034',
       backgroundAudioLine: 'rgba(255, 255, 255, 0.15)',
       backgroundAudioProgress: '#b7d4d3',
-      backgroundAudioProgressSelector: '#b7d4d3'
+      backgroundAudioProgressSelector: '#b7d4d3',
+      colorFileExtension: '#a2a5a8'
     },
     markdown: {
       background: 'rgba(239, 239, 239, 0.7)',
@@ -37751,6 +37810,7 @@ var cssThemeVars = function cssThemeVars(_ref) {
     '--chat-message-bg-color-audio-line': message.backgroundAudioLine,
     '--chat-message-bg-color-audio-progress': message.backgroundAudioProgress,
     '--chat-message-bg-color-audio-progress-selector': message.backgroundAudioProgressSelector,
+    '--chat-message-color-file-extension': message.colorFileExtension,
     // markdown
     '--chat-markdown-bg': markdown.background,
     '--chat-markdown-border': markdown.border,
@@ -38135,10 +38195,10 @@ var ChatWindowvue_type_script_lang_js_require = __webpack_require__("4c1d"),
     },
     openFile: function openFile(_ref2) {
       var message = _ref2.message,
-          action = _ref2.action;
+          file = _ref2.file;
       this.$emit('open-file', {
         message: message,
-        action: action
+        file: file
       });
     },
     openUserTag: function openUserTag(_ref3) {

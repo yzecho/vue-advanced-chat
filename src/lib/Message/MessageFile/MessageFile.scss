@@ -1,6 +1,5 @@
-.vac-image-container {
-	width: 250px;
-	max-width: 100%;
+.vac-message-file-container {
+	position: relative;
 
 	.vac-image-loading {
 		filter: blur(3px);
@@ -44,6 +43,16 @@
 		.vac-button-view {
 			max-width: 18px;
 			bottom: 8px;
+		}
+	}
+
+	.vac-video-container {
+		width: 350px;
+		max-width: 100%;
+		margin: 4px auto 5px;
+
+		video {
+			border-radius: 4px;
 		}
 	}
 }

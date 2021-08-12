@@ -126,7 +126,20 @@
 			v-show="Object.keys(room).length && showFooter"
 			ref="roomFooter"
 			class="vac-room-footer"
+			:class="{
+				'vac-app-box-shadow': shadowFooter
+			}"
 		>
+			<room-emojis
+				:filtered-emojis="filteredEmojis"
+				@select-emoji="selectEmoji($event)"
+			/>
+
+			<room-users-tag
+				:filtered-users-tag="filteredUsersTag"
+				@select-user-tag="selectUserTag($event)"
+			/>
+
 			<room-message-reply
 				:room="room"
 				:message-reply="messageReply"
@@ -139,26 +152,18 @@
 				</template>
 			</room-message-reply>
 
-			<room-emojis
-				:filtered-emojis="filteredEmojis"
-				@select-emoji="selectEmoji($event)"
-			/>
-
-			<room-users-tag
-				:filtered-users-tag="filteredUsersTag"
-				@select-user-tag="selectUserTag($event)"
-			/>
-
-			<div
-				class="vac-box-footer"
-				:class="{
-					'vac-app-box-shadow': filteredEmojis.length || filteredUsersTag.length
-				}"
+			<room-files
+				:files="files"
+				@remove-file="removeFile"
+				@reset-message="resetMessage"
 			>
-				<div
-					v-if="showAudio && !imageFile && !videoFile"
-					class="vac-icon-textarea-left"
-				>
+				<template v-for="(i, name) in $scopedSlots" #[name]="data">
+					<slot :name="name" v-bind="data" />
+				</template>
+			</room-files>
+
+			<div class="vac-box-footer">
+				<div v-if="showAudio && !files.length" class="vac-icon-textarea-left">
 					<template v-if="isRecording">
 						<div
 							class="vac-svg-button vac-icon-audio-stop"
@@ -192,55 +197,7 @@
 					</div>
 				</div>
 
-				<div v-if="imageFile" class="vac-media-container">
-					<div class="vac-svg-button vac-icon-media" @click="resetMediaFile">
-						<slot name="image-close-icon">
-							<svg-icon name="close" param="image" />
-						</slot>
-					</div>
-					<div class="vac-media-file">
-						<img ref="mediaFile" :src="imageFile" @load="onMediaLoad" />
-					</div>
-				</div>
-
-				<div v-else-if="videoFile" class="vac-media-container">
-					<div class="vac-svg-button vac-icon-media" @click="resetMediaFile">
-						<slot name="image-close-icon">
-							<svg-icon name="close" param="image" />
-						</slot>
-					</div>
-					<div ref="mediaFile" class="vac-media-file">
-						<video width="100%" height="100%" controls>
-							<source :src="videoFile" />
-						</video>
-					</div>
-				</div>
-
-				<div
-					v-else-if="file"
-					class="vac-file-container"
-					:class="{ 'vac-file-container-edit': editedMessage._id }"
-				>
-					<div class="vac-icon-file">
-						<slot name="file-icon">
-							<svg-icon name="file" />
-						</slot>
-					</div>
-					<div class="vac-file-message">
-						{{ file.audio ? file.name : message }}
-					</div>
-					<div
-						class="vac-svg-button vac-icon-remove"
-						@click="resetMessage(null, true)"
-					>
-						<slot name="file-close-icon">
-							<svg-icon name="close" />
-						</slot>
-					</div>
-				</div>
-
 				<textarea
-					v-show="!file || imageFile || videoFile"
 					ref="roomTextarea"
 					:placeholder="textMessages.TYPE_MESSAGE"
 					class="vac-textarea"
@@ -248,10 +205,8 @@
 						'vac-textarea-outline': editedMessage._id
 					}"
 					:style="{
-						'min-height': `${mediaDimensions ? mediaDimensions.height : 20}px`,
-						'padding-left': `${
-							mediaDimensions ? mediaDimensions.width - 10 : 12
-						}px`
+						'min-height': `20px`,
+						'padding-left': `12px`
 					}"
 					@input="onChangeInput"
 					@keydown.esc="escapeTextarea"
@@ -271,7 +226,7 @@
 					</div>
 
 					<emoji-picker-container
-						v-if="showEmojis && (!file || imageFile || videoFile)"
+						v-if="showEmojis"
 						v-click-outside="() => (emojiOpened = false)"
 						:emoji-opened="emojiOpened"
 						:position-top="true"
@@ -307,6 +262,7 @@
 						v-if="showFiles"
 						ref="file"
 						type="file"
+						multiple
 						:accept="acceptedFiles"
 						style="display:none"
 						@change="onFileChange($event.target.files)"
@@ -338,6 +294,7 @@ import SvgIcon from '../../components/SvgIcon/SvgIcon'
 import EmojiPickerContainer from '../../components/EmojiPickerContainer/EmojiPickerContainer'
 
 import RoomHeader from './RoomHeader/RoomHeader'
+import RoomFiles from './RoomFiles/RoomFiles'
 import RoomMessageReply from './RoomMessageReply/RoomMessageReply'
 import RoomUsersTag from './RoomUsersTag/RoomUsersTag'
 import RoomEmojis from './RoomEmojis/RoomEmojis'
@@ -347,7 +304,6 @@ import filteredUsers from '../../utils/filter-items'
 import Recorder from '../../utils/recorder'
 
 const { detectMobile, iOSDevice } = require('../../utils/mobile-detection')
-const { isImageFile, isVideoFile } = require('../../utils/media-file')
 
 const debounce = (func, delay) => {
 	let inDebounce
@@ -367,6 +323,7 @@ export default {
 		SvgIcon,
 		EmojiPickerContainer,
 		RoomHeader,
+		RoomFiles,
 		RoomMessageReply,
 		RoomUsersTag,
 		RoomEmojis,
@@ -430,10 +387,7 @@ export default {
 			infiniteState: null,
 			loadingMessages: false,
 			loadingMoreMessages: false,
-			file: null,
-			imageFile: null,
-			videoFile: null,
-			mediaDimensions: null,
+			files: [],
 			fileDialog: false,
 			emojiOpened: false,
 			hideOptions: true,
@@ -479,10 +433,18 @@ export default {
 			return this.messages.length && this.messagesLoaded
 		},
 		isMessageEmpty() {
-			return !this.file && !this.message.trim()
+			return !this.files.length && !this.message.trim()
 		},
 		recordedTime() {
 			return new Date(this.recorder.duration * 1000).toISOString().substr(14, 5)
+		},
+		shadowFooter() {
+			return (
+				!!this.filteredEmojis.length ||
+				!!this.filteredUsersTag.length ||
+				!!this.files.length ||
+				!!this.messageReply
+			)
 		}
 	},
 
@@ -608,7 +570,7 @@ export default {
 			this.loadingMessages = true
 			this.scrollIcon = false
 			this.scrollMessagesCount = 0
-			this.resetMessage(true, null, true)
+			this.resetMessage(true, true)
 
 			if (this.roomMessage) {
 				this.message = this.roomMessage
@@ -788,35 +750,14 @@ export default {
 
 			this.textareaCursorPosition = null
 		},
-		onMediaLoad() {
-			let height = this.$refs.mediaFile.clientHeight
-			if (height < 30) height = 30
-
-			this.mediaDimensions = {
-				height: this.$refs.mediaFile.clientHeight - 10,
-				width: this.$refs.mediaFile.clientWidth + 26
-			}
-		},
 		escapeTextarea() {
 			if (this.filteredEmojis.length) this.filteredEmojis = []
 			else if (this.filteredUsersTag.length) this.filteredUsersTag = []
 			else this.resetMessage()
 		},
-		resetMessage(
-			disableMobileFocus = false,
-			editFile = false,
-			initRoom = false
-		) {
+		resetMessage(disableMobileFocus = false, initRoom = false) {
 			if (!initRoom) {
 				this.$emit('typing-message', null)
-			}
-
-			if (editFile) {
-				this.file = null
-				this.message = ''
-				this.preventKeyboardFromClosing()
-				setTimeout(() => this.focusTextarea(disableMobileFocus))
-				return
 			}
 
 			this.selectedUsersTag = []
@@ -825,22 +766,10 @@ export default {
 			this.message = ''
 			this.editedMessage = {}
 			this.messageReply = null
-			this.file = null
-			this.mediaDimensions = null
-			this.imageFile = null
-			this.videoFile = null
+			this.files = []
 			this.emojiOpened = false
 			this.preventKeyboardFromClosing()
 			setTimeout(() => this.focusTextarea(disableMobileFocus))
-		},
-		resetMediaFile() {
-			this.mediaDimensions = null
-			this.imageFile = null
-			this.videoFile = null
-			this.editedMessage.file = null
-			this.file = null
-			this.resetTextareaSize()
-			this.focusTextarea()
 		},
 		resetTextareaSize() {
 			if (!this.$refs['roomTextarea']) return
@@ -867,7 +796,7 @@ export default {
 		sendMessage() {
 			let message = this.message.trim()
 
-			if (!this.file && !message) return
+			if (!this.files.length && !message) return
 
 			this.selectedUsersTag.forEach(user => {
 				message = message.replace(
@@ -876,12 +805,14 @@ export default {
 				)
 			})
 
+			const files = this.files.length ? this.files : null
+
 			if (this.editedMessage._id) {
-				if (this.editedMessage.content !== message || this.file) {
+				if (this.editedMessage.content !== message || files) {
 					this.$emit('edit-message', {
 						messageId: this.editedMessage._id,
 						newContent: message,
-						file: this.file,
+						files: files,
 						replyMessage: this.messageReply,
 						usersTag: this.selectedUsersTag
 					})
@@ -889,7 +820,7 @@ export default {
 			} else {
 				this.$emit('send-message', {
 					content: message,
-					file: this.file,
+					files: files,
 					replyMessage: this.messageReply,
 					usersTag: this.selectedUsersTag
 				})
@@ -935,23 +866,19 @@ export default {
 			this.$emit('send-message-reaction', messageReaction)
 		},
 		replyMessage(message) {
+			this.editedMessage = {}
 			this.messageReply = message
 			this.focusTextarea()
 		},
 		editMessage(message) {
 			this.resetMessage()
+
 			this.editedMessage = { ...message }
-			this.file = message.file
-
-			if (isImageFile(this.file)) {
-				this.imageFile = message.file.url
-				setTimeout(() => this.onMediaLoad())
-			} else if (isVideoFile(this.file)) {
-				this.videoFile = message.file.url
-				setTimeout(() => this.onMediaLoad(), 50)
-			}
-
 			this.message = message.content
+
+			if (message.files) {
+				this.files = [...message.files]
+			}
 		},
 		getBottomScroll(element) {
 			const { scrollHeight, clientHeight, scrollTop } = element
@@ -1006,32 +933,27 @@ export default {
 		},
 		async onFileChange(files) {
 			this.fileDialog = true
-			this.resetMediaFile()
+			this.focusTextarea()
 
-			const file = files[0]
-			const fileURL = URL.createObjectURL(file)
-			const blobFile = await fetch(fileURL).then(res => res.blob())
-			const typeIndex = file.name.lastIndexOf('.')
+			files.forEach(async file => {
+				const fileURL = URL.createObjectURL(file)
+				const blobFile = await fetch(fileURL).then(res => res.blob())
+				const typeIndex = file.name.lastIndexOf('.')
 
-			this.file = {
-				blob: blobFile,
-				name: file.name.substring(0, typeIndex),
-				size: file.size,
-				type: file.type,
-				extension: file.name.substring(typeIndex + 1),
-				localUrl: fileURL
-			}
-
-			if (isImageFile(this.file)) {
-				this.imageFile = fileURL
-			} else if (isVideoFile(this.file)) {
-				this.videoFile = fileURL
-				setTimeout(() => this.onMediaLoad(), 50)
-			} else {
-				this.message = file.name
-			}
+				this.files.push({
+					blob: blobFile,
+					name: file.name.substring(0, typeIndex),
+					size: file.size,
+					type: file.type,
+					extension: file.name.substring(typeIndex + 1),
+					localUrl: fileURL
+				})
+			})
 
 			setTimeout(() => (this.fileDialog = false), 500)
+		},
+		removeFile(index) {
+			this.files.splice(index, 1)
 		},
 		initRecorder() {
 			this.isRecording = false
@@ -1058,7 +980,7 @@ export default {
 
 					const record = this.recorder.records[0]
 
-					this.file = {
+					this.files.push({
 						blob: record.blob,
 						name: `audio.${this.format}`,
 						size: record.blob.size,
@@ -1066,7 +988,7 @@ export default {
 						type: record.blob.type,
 						audio: true,
 						localUrl: URL.createObjectURL(record.blob)
-					}
+					})
 
 					this.recorder = this.initRecorder()
 					this.sendMessage()
@@ -1085,8 +1007,8 @@ export default {
 				}
 			}
 		},
-		openFile({ message, action }) {
-			this.$emit('open-file', { message, action })
+		openFile({ message, file }) {
+			this.$emit('open-file', { message, file })
 		},
 		openUserTag(user) {
 			this.$emit('open-user-tag', user)
